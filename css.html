@@ -1,0 +1,127 @@
+<style>
+.draggable {
+  border: 1px solid;
+  background-color: white;
+  z-index : 1000;
+}
+
+.jumbotron {
+  padding: 0.5em 0.6em;
+}
+.jumbotron h1 {
+  font-size: 2em;
+}
+.jumbotron p {
+  font-size: 1.2em;
+}
+.jumbotron p .btn {
+  padding: 0.5em;
+}
+
+.debug {
+  font-size: 0.5em;
+  color: #BBB;
+  visibility: hidden;
+}
+
+#bannerArea {
+  position: fixed;
+  top: 180px;
+  left: 2px;
+  width: 98%;
+  height: 60px;
+  z-index: 2000;
+}
+
+.strikethrough {
+  text-decoration: line-through;
+}
+#errorBanner {
+  width: 100%;
+  text-align: center;
+}
+
+#debug {
+  visibility: hidden;
+}
+
+
+tr {
+width: 100%;
+display: inline-table;
+table-layout: fixed;
+}
+
+table{
+ height: 900px;     /*<-- Select the height of the table */
+ display: -moz-groupbox;    /* Firefox Bad Effect*/
+}
+
+tbody{
+  overflow-y: scroll;      
+  height: 600px;            /* <-- Select the height of the body*/
+  width: 100%;
+  /*position: absolute;*/
+}
+
+thead{
+  /* background-color: #FFE; */ 
+  width: 100%;
+}
+
+.cl1{
+  width: 20%;
+  min-width: 200px;
+  max-width: 400px;
+}
+
+.cl2{
+  width: 60%;
+  min-width: 200px;
+  max-width: 400px;
+}
+
+.Amazon, .Amazon td,
+.Nile, .Nile td,
+.Danube, .Danube td,
+.Yangtze, .Yangtze td
+ {
+    background-color: #A5D6A7; /* Muted Green */
+    color: #333; /* Dark text color */
+}
+
+.Nile, .Nile td {
+    background-color: #FFCDD2; /* Very Muted Red */
+    color: #333; /* Dark text color */
+}
+
+.Danube, .Danube td {
+    background-color: #D1C4E9; /* Very Muted Purple */
+    color: #333; /* Dark text color */
+}
+
+.Yangtze, .Yangtze td {
+    background-color: #FFF9C4; /* Muted Yellow */
+    color: #333; /* Dark text color */
+}
+
+.studentBox{
+    color: #333; /* Dark text color */
+}
+
+/* Style for the odd rows (e.g., a lighter green) */
+.table-striped tbody tr:nth-of-type(odd) {
+  background-color: #e6ffed; /* A light green */
+}
+
+/* Style for the even rows (e.g., a slightly darker or different green) */
+/* Note: By default, Bootstrap's table-striped only styles odd rows. */
+/* To get *alternating* greens, you need to explicitly style the even rows too. */
+/* If you just wanted green stripes on a white/default background, you'd only need the rule above. */
+.table-striped tbody tr:nth-of-type(even) {
+  background-color: #cfffdc; /* A slightly darker/different light green */
+  /* Or set to 'transparent' or 'white' if you only want the odd rows green */
+  /* background-color: white; */
+}
+
+</style>

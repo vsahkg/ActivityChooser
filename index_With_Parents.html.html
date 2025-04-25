@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html>
+    <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <base target="_top">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-color/dist/ectype/bootstrap-color.min.css">
+    <?!= include('css'); ?> 
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.2/angular.min.js"></script>
+  </head>
+  <body>
+
+<div class="container" ng-app="myApp" ng-controller="myCtrl as vm">
+  <div class="jumbotron">
+    <h1><?= appTitle?></h1>
+    <small class="row">
+      <span class="col-10" id="StudentName">Logged in as <?= thisUser?></span> 
+      <div class="pull-right col">
+        <button class="btn btn-light btn-sm" ng-click="reloadData()" title="click me to refresh data / check if survey is open" ng-disabled="dataFetching">Refresh</button>
+      </div>
+    </small>
+  </div>
+  
+  <div id="bannerArea" ng-show="dataFetching"><div class="alert alert-info" >Loading...</div></div>
+  
+  <div id="myTop"  >
+    <div id="errorBanner" class="alert alert-danger" ng-show="error.status">{{error.msg}}</div>
+   
+    <div class="row">
+      <table class="table table-striped">
+        <thead >
+          <tr>
+            <td class="cl1">
+              <h2><small>Student Details</small></h2>
+            </td> 
+            <td class="cl2">
+              <h2><small>Choice</small></h2>
+            </td>
+            <td ng-if="data.userType.isApprover" class="cl3">
+              <h2><small>Action</small></h2>
+            </td>
+          </tr>
+          <tr ng-if="data.userType.isAdvisor || data.userType.isApprover">
+          <td colspan="2">
+            <div class="col-md-10">
+              <div class="row" >
+                  <div class="col-md-3 small">Student Name: <input type="text" ng-model="myFilter.student.fullname" title="Enter the student's full name"/></div>
+                  <div class="col-md-3 small">HRM: <input type="text" ng-model="myFilter.student.hrm" title="Enter the HRM"/></div>
+                  <div class="col-md-3">Choice Filter:</div>
+                  <div class="col-md-3"><select ng-model="myFilter.currentchoice.choice1" ng-options="c[0] as c[0] for c in data.possibleChoiceList" title="Select the first choice"></select></div>
+              </div>
+              <div class="row" >
+                  <div class="col-md-3 small">Student ID: <input type="text" ng-model="myFilter.student.id" title="Enter the student ID"/></div>
+                  <div class="col-md-3 small">Gender: <input type="text" ng-model="myFilter.student.gender" title="Enter the student's gender"/></div>
+                  <div class="col-md-3" ng-if="data.secondChoice">Choice 2</div>
+                  <div class="col-md-3" ng-if="data.secondChoice"><select ng-model="myFilter.currentchoice.choice2" ng-options="c[0] as c[0] for c in data.possibleChoiceList" title="Select the second choice"></select></div>                 
+                </div>
+            </div>
+            <div classs="col-md-2">
+              <div class="pull-right"><label><input type="checkbox" ng-model="myFilter.currentchoice.principalChecked" title="Check to lock the choice">Locked</label>
+              <button ng-click="resetFilter()" class="btn">Clear Filter</button>
+              <p>Records: {{filtered.length}}</p></div>
+            </div>
+          </td>
+        </thead>
+        <tbody>
+          <tr ng-repeat="s in students | filter: myFilter as filtered" class="studentBox">
+            <td class="cl1"><div class="col-md-12">{{s.student.fullname}}</div><div class="col-md-12">{{s.student.hrm}} {{s.student.gender}}</div></td>
+            <td class="cl2" ng-class="checkButtonDisabled(s) ? '' : 'alert-warning'">
+              <div class="row">
+                <div class="col-md-12 container">
+                  <div class="row" >
+                    <div class="col-12 alert row" ng-class="{'alert-success': (s.currentchoice.choice1 != '') && (s.currentchoice.choice1 != 'NONE')}">
+                      <span class="col-12 small">Signed up for:</span>
+                      <div class="col-md-6">1: {{s.currentchoice.choice1}} <br/>
+                        <div ng-show="s.currentchoice.choice1"><span class="lead"> {{tripCounts[s.currentchoice.choice1].displayName}}  </span><span class="muted" ><small>( {{tripCounts[s.currentchoice.choice1].session}}: {{tripCounts[s.currentchoice.choice1].location}} )</small></span></div>
+                      </div>
+                      <div class="col-md-6">2: {{s.currentchoice.choice2}} <br/>
+                        <div ng-show="s.currentchoice.choice2"><span class="lead"> {{tripCounts[s.currentchoice.choice2].displayName}}  </span><span class="muted" ><small>( {{tripCounts[s.currentchoice.choice2].session}}: {{tripCounts[s.currentchoice.choice2].location}} )</small></span></div>
+                      </div>
+                    </div>
+                  </div> 
+                  <!-- STUDENT / APPROVER / PARENT VIEW - Loops through each student accessible by the user-->
+                  <div class="row" ng-if="((s.student.id == data.user)&& (s.choice.canPost)) || data.userType.isApprover || data.userType.isParent">
+                    <!-- Student Selection Dorpdowns and Button-->
+                    <div class="studentsection" ng-if="((s.student.id == data.user)&& (s.choice.canPost))">
+                      <div class="col-12">
+                        <label class="col"for="choice1DropDown">Choice 1: </label>
+                        <select name="choice1DropDown" ng-model="s.choice.choice1" 
+                                ng-options="(c+' ('+tripCounts[c].taken+'/'+tripCounts[c].quota+')') for c in (s.possibleChoices | filter:updateFilteredChoices(s,s.choice.choice2))" 
+                                ng-change="updateFilteredChoices(s)"
+                                class="form-control col-12" ng-disabled="s.choice.advisorChecked || s.choice.principalChecked" title="Select the first choice"></select> 
+                      </div>
+                      <div class="col-12">
+                        <label class="col"for="choice2DropDown">Choice 2: </label>
+                        <select name="choice2DropDown" ng-model="s.choice.choice2" 
+                                ng-options="(c+' ('+tripCounts[c].taken+'/'+tripCounts[c].quota+')') for c in (s.possibleChoices2 | filter:updateFilteredChoices(s,s.choice.choice1))" 
+                                ng-change="updateFilteredChoices(s)"
+                                class="form-control col-12" ng-disabled="s.choice.advisorChecked || s.choice.principalChecked" title="Select the second choice"></select>
+                      </div>              
+                      <span class="col col-12" ng-show="(s.student.id == data.user) && (s.choice.canPost)">
+                        <button ng-click="studentPostChoices(s.choice, s.row)" title="Survey Open:{{s.student.surveyOpen}} from {{s.student.surveyStart}}" 
+                                ng-if="s.choice.canPost && !(s.choice.advisorChecked || s.choice.principalChecked)" 
+                                ng-disabled="checkButtonDisabled(s)" 
+                                ng-class="checkButtonDisabled(s) ? '' : 'btn-warning'" class="btn">Save choice</button>
+                        <div class="col-md-12 text-warning" ng-if="s.choice.advisorChecked || s.choice.principalChecked">Choice Locked</div>
+                      </span>
+                    </div>
+                    <!-- Parent Selection Dropdowns and Button-->
+                    <div class="parentsection" ng-if="data.userType.isParent">
+                      <div class="col-md-12">
+                          <label for="parentChoice1" title="Select the field trip choice">Field Trip Choice:</label>
+                          <select name="choice1DropDown" id="parentChoice1" ng-model="s.choice.choice1" 
+                                  ng-options="(c+' ('+tripCounts[c].taken+'/'+tripCounts[c].quota+')') for c in (s.possibleChoices | filter:updateFilteredChoices(s,s.choice.choice2))" 
+                                  ng-change="handleParentChoice1Change(s)"
+                                  class="form-control col-12" ng-disabled="s.choice.advisorChecked || s.choice.principalChecked" title="Select the first choice"></select> 
+                      </div>
+                      <div class="col-12">
+                        <label class="col"for="choice2DropDown">Please read the parent letter regarding field trip and indicate agreement:</label>
+                        <select name="choice2DropDown" ng-model="s.choice.choice2" id="parentChoice2"
+                                ng-options="c for c in (s.possibleChoices2 | filter:updateFilteredChoices(s,s.choice.choice1))" 
+                                ng-change="updateFilteredChoices(s)"
+                                class="form-control col-12" ng-disabled="s.choice.advisorChecked || s.choice.principalChecked" title="Select the second choice"></select>
+                      </div> 
+                      <span class="col col-12" ng-show="data.userType.isParent && (s.choice.canPost)">
+                        <button ng-click="parentPostChoices(s.choice, s.row)" title="Survey Open:{{s.student.surveyOpen}} from {{s.student.surveyStart}}" 
+                                ng-if="s.choice.canPost && !(s.choice.advisorChecked || s.choice.principalChecked)" 
+                                ng-disabled="checkParentSubmitDisabled(s)" 
+                                ng-class="checkParentSubmitDisabled(s) ? '' : 'btn-warning'" class="btn">Save choice</button>
+                        <div class="col-md-12 text-warning" ng-if="s.choice.advisorChecked || s.choice.principalChecked">Choice Locked</div>
+                      </span>
+                    </div>
+                  </div>
+                  <div class="col-md-12 alert alert-info small" ng-if="!(s.choice.canPost) && (s.student.surveyStart && s.student.surveyEnd)">Survey not open for you. Timing: {{s.student.surveyStart}} - {{s.student.surveyEnd}}.</div>
+                </div>
+                
+              </div>
+            </td>
+            <!-- Approver Save Button -->
+            <td ng-show="data.userType.isApprover" class="cl3">
+              <label ng-class="{'alert-warning' : s.currentchoice.principalChecked != s.choice.principalChecked}"><input type="checkbox" ng-model="s.choice.principalChecked" title="Check to lock the choice">Lock</label>
+              <button class="btn" ng-click="postChoices(s.choice, s.row)" 
+                      ng-disabled="checkButtonDisabled(s)" 
+                      ng-class="checkButtonDisabled(s) ? '' : 'btn-warning'">Save</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+ 
+</div><!--container-->
+
+<?!= include("script"); ?>
+
+</body>
+</html>

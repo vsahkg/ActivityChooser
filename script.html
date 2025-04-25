@@ -1,0 +1,382 @@
+  <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.12.9/dist/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+ <!-- <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+  <script src="//code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/js/bootstrap.min.js"></script>-->
+<script>
+
+  /*$(function() {
+    $( ".draggable" ).draggable();
+  });*/
+
+
+//Angular
+var app = angular.module('myApp', []);
+
+
+app.controller('myCtrl', function($scope, $interval, filterFilter){
+    $scope.students = [];
+    $scope.error = {status: false, class: "bg-danger", msg: "Error"};
+    $scope.dataFetching = false;
+    $scope.data = {tripCounts : new Array()};
+    $scope.tripCounts = {};
+    $scope.refreshInterval = 30;
+    $scope.intervalCounter = 0;
+    $scope.intervalMin = 20;
+    $scope.intervalMax = 120;
+    $scope.intervalPromise = "";
+    $scope.intervalStarted = false;
+    $scope.myFilter = {}
+    $scope.getFilterCount = function(){
+      return filterFilter( $scope.students, myFilter).length;
+    }
+    
+    $scope.resetFilter = function() {
+      resetFilter();
+    }
+    function resetFilter() {
+     $scope.myFilter = { currentchoice: {  id: "",
+                                          email: "",
+                                          timeDate: "",
+                                          hrm: "",
+                                          advisorChecked: "",
+                                          choice1: "",
+                                          choice2: "",
+                                          approvalChange: "",
+                                          approvalDate: "",
+                                          principalChecked: "",
+                                          paid: "",
+                                          canPost: ""},
+                        student: { id: "",
+                                    email: "",
+                                    hrm: "",
+                                    lastname: "",
+                                    firstname: "",
+                                    advisor: "",
+                                    surveyOpen: "",
+                                    surveyStart: "",
+                                    surveyEnd: "",
+                                    gender: "",
+                                    fullname: ""}};
+    }
+    resetFilter();    
+    
+    $scope.reloadData = function(){
+      loadData();
+    }
+    
+    $scope.toggleInterval = function(){
+      //$scope.intervalStarted = !($scope.intervalStarted);
+      if ($scope.intervalStarted){ startInterval(); } else { stopInterval()};
+    }
+    
+    function loadData() {
+      $scope.dataFetching = true;
+      google.script.run.withSuccessHandler(showData).loadGInfo();
+    }
+    
+    loadData();
+    
+    function startInterval(){
+        $interval.cancel($scope.intervalPromise);
+        $scope.intervalPromise = $interval(function(){
+                                                        var refreshInterval = $scope.refreshInterval;                          
+                                                        $scope.intervalCounter++;
+                                                        var counter = $scope.intervalCounter;
+                                                        //console.log(counter);
+                                                        if(refreshInterval < $scope.intervalMin){
+                                                           $scope.refreshInterval = 20;
+                                                        }
+                                                        if(counter % refreshInterval == 0){
+                                                            fetchCountsData();
+                                                            $scope.intervalCounter=0;
+                                                        }
+                                 
+                                                       }, 1000);
+    }
+    
+    function stopInterval(){
+      $interval.cancel($scope.intervalPromise);
+    }
+    
+    function showData(data){
+      $scope.data = data; 
+      $scope.dataFetching = false;
+      $scope.error = data.error;
+      try{
+        var myData = $scope.data;  
+        updateDataSet();
+        $scope.students.forEach((student, index) => {
+          student.row = index;
+        }); //Get and save index in array for later updating.
+        if(!$scope.error.status){
+            $scope.toggleInterval();
+          } else {
+            stopInterval();
+          }
+        } catch(e) {
+          $scope.error.msg = e;
+          $scope.error.status = true;
+          console.log(e);
+        }//*/
+        $scope.$digest();
+        console.log($scope);
+    };
+    
+    function updateDataSet(){
+      var myData = $scope.data;
+
+      var students = [];
+      for (var s=0; s < myData.studentInfo.length; s++){ //loop through each student in student info
+        var thisRow = myData.studentInfo[s];
+        var thisStudent = { id: thisRow[0],
+                            email: thisRow[11],
+                            hrm: thisRow[2],
+                            lastname: thisRow[3],
+                            firstname: thisRow[4],
+                            advisor: thisRow[20],
+                            surveyOpen: thisRow[17],
+                            surveyStart: thisRow[18],
+                            surveyEnd: thisRow[19],
+                            gender: thisRow[15],
+                            fullname: thisRow[1],
+                            house: thisRow[14]
+                          };
+        
+        var myChoices = getRowsMatching(myData.choiceData, 0, thisStudent.id);
+        var thisChoices = {};
+        console.log(myChoices, thisStudent.id, myData.choiceData);
+        if (myChoices.length > 0){
+          thisChoices = { id: myChoices[0][0],
+                          email: myChoices[0][1],
+                          timeDate: myChoices[0][2],
+                          hrm: myChoices[0][3],
+                          advisorChecked: myChoices[0][4],
+                          choice1: myChoices[0][5],
+                          choice2: myChoices[0][6],
+                          approvalChange: myChoices[0][7],
+                          approvalDate: myChoices[0][8],
+                          principalChecked: myChoices[0][9],
+                          paid: myChoices[0][10],
+                          canPost: thisRow[17],
+                          house: myChoices[0][11]
+                        };
+        } else {
+          thisChoices = { id: thisRow[0],
+                          email: thisRow[0],
+                          timeDate: "",
+                          hrm: thisRow[2],
+                          advisorChecked: false,
+                          choice1: "",
+                          choice2: "",
+                          approvalChange: "",
+                          approvalDate: "",
+                          principalChecked: false,
+                          paid: "",
+                          canPost: thisRow[17],
+                          house: thisRow[14]
+                        };
+        }
+        
+        var choiceList = [];
+        var possibleChoices = myData.possibleChoiceList;
+        for (var ch = 0; ch < possibleChoices.length; ch++){
+          //Check choices for isParent and isStudent - if isStudent, make sure col 11 is True, is isParent, make sure col 12 is True. If isApprover, allow all choices.
+          if(myData.userType.isStudent && !possibleChoices[ch][11]) continue; //skip this option if student and col 11 is not true
+          if(myData.userType.isParent && !possibleChoices[ch][12]) continue; //skip this option if parent and col 12 is not true
+          if(possibleChoices[ch][9]){ //if this choice is "TRUE" for choice 1
+            var thisRequirement = possibleChoices[ch][6];
+            var thisReqCol = possibleChoices[ch][5];
+            if (thisRequirement.includes(thisRow[thisReqCol])) {  //If student data matches requirement of activity
+              choiceList.push(possibleChoices[ch][0]);
+            }
+          }
+        }
+        var choiceList2 = []
+        for (var ch = 0; ch < possibleChoices.length; ch++){
+          //Check choices for isParent and isStudent - if isStudent, make sure col 11 is True, is isParent, make sure col 12 is True. If isApprover, allow all choices.
+          if(myData.userType.isStudent && !possibleChoices[ch][11]) continue; //skip this option if student and col 11 is not true
+          if(myData.userType.isParent && !possibleChoices[ch][12]) continue; //skip this option if parent and col 12 is not true
+          if(possibleChoices[ch][10]){ //if this choice is "TRUE" for choice 2
+            var thisRequirement = possibleChoices[ch][6];
+            var thisReqCol = possibleChoices[ch][5];
+            if (thisRequirement.includes(thisRow[thisReqCol])) {  //If student data matches requirement of activity
+              choiceList2.push(possibleChoices[ch][0]);
+            }
+          }
+        }
+        students.push({student: thisStudent, currentchoice: JSON.parse(JSON.stringify(thisChoices)), choice: JSON.parse(JSON.stringify(thisChoices)), possibleChoices: choiceList, possibleChoices2: choiceList2}); //currentchoice will load a copy of the choice data. choice will be used to be manipulated by user and submit to server.
+      }
+      $scope.students = students; 
+      updateTripCounts();
+
+    };
+    
+    function fetchCountsData() {
+      $scope.dataFetching = true;
+      google.script.run.withSuccessHandler(tripCountsReceived).getTripCounts();
+    }
+    
+    function tripCountsReceived(e){
+      $scope.dataFetching = false;
+      //console.log(e);
+      $scope.data.tripCounts = e;
+      updateTripCounts();
+    }
+    
+    function updateTripCounts(){
+      var trip = {};
+      var myData = $scope.data;
+      //var myTripCounts = $scope.tripCounts;
+      for (var t=1; t < myData.tripCounts.length; t++){ //loop through each entry in tripCounts
+        trip[myData.tripCounts[t][0]] = {name: myData.tripCounts[t][0],
+                                          quota: myData.tripCounts[t][1],
+                                          taken: myData.tripCounts[t][2],
+                                          session: myData.tripCounts[t][3],
+                                          location: myData.tripCounts[t][4],
+                                          displayName: myData.tripCounts[t][5],
+                                          masterActivity: myData.tripCounts[t][6] };
+                                        }
+      $scope.tripCounts = trip;
+      $scope.$digest();
+    }
+    $scope.handleParentChoice1Change = function(s) {
+        s.choice.choice2 = ''; // Clear the second choice
+        $scope.updateFilteredChoices(s); // Call the existing function
+    };
+    $scope.updateFilteredChoices = function(s,check) { 
+      if($scope.tripCounts[check]){
+        var taken = $scope.tripCounts[check].masterActivity;
+        return function(choice) { // Return a filtering function
+            //return $scope.tripCounts[choice].masterActivity != taken;
+            return !$scope.tripCounts[choice].masterActivity.includes(taken); //Change to return where masterActivity contains a list of items not to include.
+        };
+      } else{
+        return function(choice) {
+          return true;
+        }
+      }       
+    };
+    
+    $scope.postChoices = function(data, sindex){
+      //console.log(data);
+      $scope.dataFetching = true;
+      google.script.run.withSuccessHandler(saveSuccess).approverPostData(data, sindex);
+    };
+    
+    $scope.studentPostChoices = function(data, sindex){
+      console.log(data);
+      $scope.dataFetching = true;
+      google.script.run.withSuccessHandler(saveSuccess).studentPostData(data, sindex);
+    };
+
+    $scope.parentPostChoices = function(data, sindex){
+      console.log(data);
+      $scope.dataFetching = true;
+      google.script.run.withSuccessHandler(saveSuccess).parentPostData(data, sindex);
+    };
+    
+    function saveSuccess(e){
+      $scope.dataFetching = false;
+      console.log(e);
+      //console.log(e.hasOwnProperty("choice"));
+      $scope.error = e.error;
+      if(e.hasOwnProperty("choice")){ //if no error, update data
+        $scope.students[e.sindex].choice = e.choice;
+        $scope.students[e.sindex].currentchoice = JSON.parse(JSON.stringify(e.choice));
+      }else{ //if no choice data, let's assume error and refresh data for user.
+        loadData();
+      }
+      console.log($scope);
+      $scope.$digest();
+      fetchCountsData();
+    };
+
+    $scope.checkButtonDisabled = function(s){ //returns TRUE if button should be disabled
+      //console.log({currentchoice: s.currentchoice, choice: s.choice, equal: angular.equals(s.currentchoice,s.choice)})
+      return $scope.dataFetching || angular.equals(s.currentchoice,s.choice) || !(s.choice.choice1 && s.choice.choice2);
+    }
+
+    $scope.checkParentSubmitDisabled = function(s){ //returns TRUE if button should be disabled
+      //console.log({currentchoice: s.currentchoice, choice: s.choice, equal: angular.equals(s.currentchoice,s.choice)})
+      return $scope.dataFetching || angular.equals(s.currentchoice,s.choice) || !(s.choice.choice1 && s.choice.choice2);
+    }
+    
+    
+   
+})
+
+.directive('submitButtons', function() {
+  return {
+    scope: {
+      choiceData: '=',
+      studentData: '@'
+      },
+    template: '<button ng-click="postChoice(choiceData)" title="Survey Open:{{studentData.surveyOpen}} from {{studentData.surveyStart}} until {{studentData.surveyEnd}}">Submit choices</button>'
+  };
+});
+
+
+
+
+//-----
+// getExistingRow - returns the row that contains the data matching the criteria, or returns the next row in the spreadsheet.
+//
+//-----
+function getExistingRow(myList,checkCol,checkCriteria){
+  var myRow = 0;
+  while (myRow < myList.length){
+    if (myList[myRow][checkCol] == checkCriteria) {
+      return myRow;
+    }
+    myRow++;
+  } 
+  return myRow;
+}
+
+
+
+//-----
+//   getRowsMatching takes a data list and searches the sortIndex for all values that match valueToFind, returning the rows that match this value
+//-----
+
+function getRowsMatching(myDataList, sortIndex, valueToFind){
+  
+  var foundList = new Array();
+  
+  myDataList.sort(function(a, b){ //Sort the items by studentID
+    var x = a[sortIndex];
+    var y = b[sortIndex];
+    return (x < y ? -1 : (x > y ? 1 : 0));});
+  
+  var cdr = 0;
+  var found = false; 
+  
+  while ( cdr < myDataList.length){
+    if (myDataList[cdr][sortIndex] == valueToFind) {
+      found=true;
+      foundList.push(myDataList[cdr])
+    }
+    else if (found){
+      return foundList;
+    }
+    cdr++;
+  }
+
+  return foundList;
+  
+}
+
+//Returns True if Value is found in col column of myArray 2D array
+function findThisInArray(myArray, value, col){
+  for( var i = 0; i < myArray.length; i++ ) {
+      if(myArray[i][col] == value ) {
+          return true;
+          break;
+      }
+    
+  }
+  return false;
+}
+  </script>
