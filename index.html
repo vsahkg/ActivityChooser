@@ -87,17 +87,24 @@
                       <div class="col-12">
                         <label class="col"for="choice1DropDown">Choice 1: </label>
                         <select name="choice1DropDown" ng-model="s.choice.choice1" 
-                                ng-options="(c+' ('+tripCounts[c].taken+'/'+tripCounts[c].quota+')') for c in (s.possibleChoices | filter:updateFilteredChoices(s,s.choice.choice2))" 
+                                ng-options="(c+' ('+tripCounts[c].taken+'/'+tripCounts[c].quota+')') for c in (s.possibleChoices | filter:updateFilteredChoices(s,[s.choice.choice2,s.choice.choice3]))" 
                                 ng-change="updateFilteredChoices(s)"
                                 class="form-control col-12" ng-disabled="s.choice.advisorChecked || s.choice.principalChecked" title="Select the first choice"></select> 
                       </div>
                       <div class="col-12">
                         <label class="col"for="choice2DropDown">Choice 2: </label>
                         <select name="choice2DropDown" ng-model="s.choice.choice2" 
-                                ng-options="(c+' ('+tripCounts[c].taken+'/'+tripCounts[c].quota+')') for c in (s.possibleChoices2 | filter:updateFilteredChoices(s,s.choice.choice1))" 
+                                ng-options="(c+' ('+tripCounts[c].taken+'/'+tripCounts[c].quota+')') for c in (s.possibleChoices2 | filter:updateFilteredChoices(s,[s.choice.choice1,s.choice.choice3]))" 
                                 ng-change="updateFilteredChoices(s)"
                                 class="form-control col-12" ng-disabled="s.choice.advisorChecked || s.choice.principalChecked" title="Select the second choice"></select>
-                      </div>              
+                      </div>      
+                      <div class="col-12">
+                        <label class="col"for="choice2DropDown">Choice 3: </label>
+                        <select name="choice3DropDown" ng-model="s.choice.choice3" 
+                                ng-options="(c+' ('+tripCounts[c].taken+'/'+tripCounts[c].quota+')') for c in (s.possibleChoices3 | filter:updateFilteredChoices(s,[s.choice.choice1, s.choice.choice2]))" 
+                                ng-change="updateFilteredChoices(s)"
+                                class="form-control col-12" ng-disabled="s.choice.advisorChecked || s.choice.principalChecked" title="Select the second choice"></select>
+                      </div>           
                       <span class="col col-12" ng-show="(s.student.id == data.user) && (s.choice.canPost)">
                         <button ng-click="studentPostChoices(s.choice, s.row)" title="Survey Open:{{s.student.surveyOpen}} from {{s.student.surveyStart}}" 
                                 ng-if="s.choice.canPost && !(s.choice.advisorChecked || s.choice.principalChecked)" 
