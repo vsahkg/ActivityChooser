@@ -4,8 +4,9 @@
 //
 
 // -- GLOBALS --
-var myListDocID = '1nOOS8pF3bZo4raMg88-l2O1KyaMmKCouK0ZCeM7a6Mw'; 
-
+//var myListDocID = '1nOOS8pF3bZo4raMg88-l2O1KyaMmKCouK0ZCeM7a6Mw'; //used if separated from sheets
+ var ListDoc = SpreadsheetApp.getActiveSpreadsheet();
+ var SurveyDoc = ListDoc;
 
 
 //Spreadsheet sheet names for Get Lists...
@@ -17,7 +18,7 @@ var myCreditsSheetName = 'Transcript';
 var myGradReqsSheetName = 'GradReqs';
 
 //Spreadsheet for saving student choices and Teacher Recommendations. 
-var mySurveyCollector = myListDocID; //'19_3IqX_uocu8mPKH3_GLIRKyp4pj7yBoWUsFRwXOlfY'; //Live collector in 2012-13 for 2013-14 choices
+//var mySurveyCollector = myListDocID; //'19_3IqX_uocu8mPKH3_GLIRKyp4pj7yBoWUsFRwXOlfY'; //Live collector in 2012-13 for 2013-14 choices
 //var mySurveyCollector = '1LsiB1BFZgc-RjmQ0zFUw4cNvAkyz7nSnKqLmPT70tCY'; //Trial DEV Spreadsheet
 
 
@@ -49,9 +50,9 @@ var entityTitle = 'Selections'; // used in titles throughout app
   var studentEmailCol = 0;
   var parentEmailCol = 12;
   var advisorEmailCol = 20;
-  var endDateCol = 19; //Survey end date col on student sheet
-  var startDateCol = 18; //survey start date col on student sheet
-  var canPostCol = 17;
+  var endDateCol = 18; //Survey end date col on student sheet
+  var startDateCol = 17; //survey start date col on student sheet
+  var canPostCol = 16;
 
 //
 // -----
@@ -67,8 +68,10 @@ function doGet(){
 // -----
 function loadGInfo() {
 
-  var ListDoc = SpreadsheetApp.openById(myListDocID);
-  var SurveyDoc = SpreadsheetApp.openById(mySurveyCollector);
+  //var ListDoc = SpreadsheetApp.openById(myListDocID);
+  //var SurveyDoc = SpreadsheetApp.openById(mySurveyCollector);
+  var ListDoc = SpreadsheetApp.getActiveSpreadsheet();
+  var SurveyDoc = ListDoc;
   
   //Check are we adventure week approver, HRM teacher or student.
   var userType = {isStudent: false, isAdvisor: false, isApprover: false, isParent: false};
@@ -142,7 +145,7 @@ function loadGInfo() {
 }
 
 function getTripCounts(){
-  var SurveyDoc = SpreadsheetApp.openById(mySurveyCollector);
+  //var SurveyDoc = SpreadsheetApp.openById(mySurveyCollector);
   var tripCounts = SurveyDoc.getSheetByName(mySurveyTripCounts).getDataRange().getValues();
   
   return tripCounts;
@@ -176,10 +179,11 @@ function getStudentInfo(ListDoc, myID){
 function getPrincipalInfo(myID){
 
   var studentInfo = [];
-  var myPrincipalList = SpreadsheetApp.openById(myListDocID).getSheetByName(myApproverListSheetName).getDataRange().getValues();
-  
+  //var myPrincipalList = SpreadsheetApp.openById(myListDocID).getSheetByName(myApproverListSheetName).getDataRange().getValues();
+  var myPrincipalList = ListDoc.getSheetByName(myApproverListSheetName).getDataRange().getValues();
   for (var i =0; i < myPrincipalList.length; i++){
-    if (myID === myPrincipalList[i][0]) studentInfo = SpreadsheetApp.openById(myListDocID).getSheetByName(myStudentDataSheetName).getDataRange().getValues().splice(1);  
+    //if (myID === myPrincipalList[i][0]) studentInfo = SpreadsheetApp.openById(myListDocID).getSheetByName(myStudentDataSheetName).getDataRange().getValues().splice(1);  
+    if (myID === myPrincipalList[i][0]) studentInfo = ListDoc.getSheetByName(myStudentDataSheetName).getDataRange().getValues().splice(1);  
   }
   return studentInfo;
 }
@@ -195,8 +199,9 @@ function studentPostData(data, sindex) {
         emailToUse = data.parentEmail; // Use parent's email if user is a parent
     }
   */
-  var ListDoc = SpreadsheetApp.openById(myListDocID);
-  var SurveyDoc = SpreadsheetApp.openById(mySurveyCollector);
+  //var ListDoc = SpreadsheetApp.openById(myListDocID);
+  //var SurveyDoc = SpreadsheetApp.openById(mySurveyCollector);
+  
   var msg = "";
   var studentList = ListDoc.getSheetByName(myStudentDataSheetName).getDataRange().getValues(); 
   var myStudentInfo = getRowsMatching(studentList, studentEmailCol, thisUser);
@@ -221,6 +226,7 @@ function studentPostData(data, sindex) {
                   data.advisorChecked,
                   data.choice1,
                   data.choice2,
+                  data.choice3,
                   data.approvalChange,
                   data.approvalDate,
                   data.principalChecked,
@@ -242,8 +248,8 @@ function studentPostData(data, sindex) {
 //--------
 function parentPostData(data, sindex) {
   var studentEmailToUse = data.id; // Use the student's ID from their choice data object.
-  var ListDoc = SpreadsheetApp.openById(myListDocID);
-  var SurveyDoc = SpreadsheetApp.openById(mySurveyCollector);
+  //var ListDoc = SpreadsheetApp.openById(myListDocID);
+  //var SurveyDoc = SpreadsheetApp.openById(mySurveyCollector);
   var msg = "";
   var studentList = ListDoc.getSheetByName(myStudentDataSheetName).getDataRange().getValues(); 
   var myStudentInfo = getRowsMatching(studentList, studentEmailCol, studentEmailToUse);
@@ -269,6 +275,7 @@ function parentPostData(data, sindex) {
                  data.advisorChecked,
                  data.choice1,
                  data.choice2,
+                 data.choice3,
                  data.approvalChange,
                  data.approvalDate,
                  data.principalChecked,
@@ -296,7 +303,7 @@ function approverPostData(data, sindex){
   //check choices data exists and has been filled 
 
   if(passTest){   
-    var mySurveyFile = SpreadsheetApp.openById(mySurveyCollector);
+    var mySurveyFile = SurveyDoc;
       var myC = new Array();  
       myC.push([data.id, 
                   data.email,
@@ -305,6 +312,7 @@ function approverPostData(data, sindex){
                   data.principalChecked,
                   data.choice1,
                   data.choice2,
+                  data.choice3,
                   thisUser,
                   new Date(),
                   data.principalChecked,
@@ -339,7 +347,7 @@ function postData(myC, SurveyDoc, checkQuota, sindex, canPost) {
     
   //If record already exists, clear it first (this is to ensure that we get accurate course spot counts without including this user's previous choice)
   if (thisRow < lastRow){   
-    var clearRange = sheet.getRange(thisRow+1, 1, 1, 7).setValues([[myC[0][0], myC[0][1], myC[0][2], myC[0][3], myC[0][4], '', '']] );    
+    var clearRange = sheet.getRange(thisRow+1, 1, 1, 8).setValues([[myC[0][0], myC[0][1], myC[0][2], myC[0][3], myC[0][4], '', '', '']] );    
     //sheet.deleteRow(thisRow+1);
   }
   
@@ -347,11 +355,11 @@ function postData(myC, SurveyDoc, checkQuota, sindex, canPost) {
     //Check not over quota. Get quota info...
     var myCounts = countSheet.getDataRange().getValues();
     // For each course entered, if spots taken greater or equal spots available, blank that course and add error message.
-    for (var x=5; x <= 6; x++){
+    for (var x=5; x <= 7; x++){
       var RowX = ArrayLib.indexOf(myCounts, 0, myC[0][x]);
       if (RowX > -1){ 
         if (myCounts[RowX][2] >= myCounts[RowX][1]) {
-          statusMessage += myC[0][x] + ' already full! Please select another choice!'; 
+          statusMessage += myC[0][x] + ' already full! Please select another choice! '; 
           problemEnc = true;
           myC[0][x] = '';
         }
@@ -377,12 +385,13 @@ function postData(myC, SurveyDoc, checkQuota, sindex, canPost) {
                        advisorChecked: myChoices[0][4],
                        choice1: myChoices[0][5],
                        choice2: myChoices[0][6],
-                       approvalChange: myChoices[0][7],
-                       approvalDate: myChoices[0][8],
-                       principalChecked: myChoices[0][9],
-                       paid: myChoices[0][10],
+                       choice3: myChoices[0][7],
+                       approvalChange: myChoices[0][8],
+                       approvalDate: myChoices[0][9],
+                       principalChecked: myChoices[0][10],
+                       paid: myChoices[0][11],
                        canPost: canPost,
-                       house: myChoices[0][11]
+                       house: myChoices[0][12]
                         }
   } else {
     problemEnc = true;
@@ -401,7 +410,8 @@ function postData(myC, SurveyDoc, checkQuota, sindex, canPost) {
 //-----
 function getStudentInfo(myID){
 
-  var myStudentListsheet = SpreadsheetApp.openById(myListDocID).getSheetByName(myStudentDataSheetName);  
+  //var myStudentListsheet = SpreadsheetApp.openById(myListDocID).getSheetByName(myStudentDataSheetName);  
+  var myStudentListsheet = ListDoc.getSheetByName(myStudentDataSheetName);  
   var LastSsRow = myStudentListsheet.getLastRow()-1;
   var studentInfo = getRowsMatching(myStudentListsheet.getRange(2, 1, LastSsRow,myStudentListsheet.getLastColumn()).getValues(),1,myID);
 
