@@ -62,6 +62,7 @@
               <p>Records: {{filtered.length}}</p></div>
             </div>
           </td>
+          </tr>
         </thead>
         <tbody>
           <tr ng-repeat="s in students | filter: myFilter as filtered" class="studentBox">
@@ -81,6 +82,9 @@
                       <div class="col-md-4">3: {{s.currentchoice.choice3}} <br/>
                         <div ng-show="s.currentchoice.choice3"><span class="lead"> {{tripCounts[s.currentchoice.choice3].displayName}}  </span><span class="muted" ><small>( {{tripCounts[s.currentchoice.choice3].session}}: {{tripCounts[s.currentchoice.choice3].location}} )</small></span></div>
                       </div>
+                      <div class="col-md-4">4: {{s.currentchoice.choice4}} <br/>
+                        <div ng-show="s.currentchoice.choice3"><span class="lead"> {{tripCounts[s.currentchoice.choice4].displayName}}  </span><span class="muted" ><small>( {{tripCounts[s.currentchoice.choice4].session}}: {{tripCounts[s.currentchoice.choice4].location}} )</small></span></div>
+                      </div>
                     </div>
                   </div> 
                   <!-- STUDENT / APPROVER / PARENT VIEW - Loops through each student accessible by the user-->
@@ -90,7 +94,7 @@
                       <div class="col-12">
                         <label class="col"for="choice1DropDown">Choice 1: </label>
                         <select name="choice1DropDown" ng-model="s.choice.choice1" 
-                                ng-options="(c+' ('+tripCounts[c].taken+'/'+tripCounts[c].quota+')') for c in (s.possibleChoices | filter:updateFilteredChoices(s,[s.choice.choice2,s.choice.choice3]))" 
+                                ng-options="(c+' ('+tripCounts[c].taken+'/'+tripCounts[c].quota+')') for c in (s.possibleChoices | filter:updateFilteredChoices(s,[s.choice.choice2,s.choice.choice3, s.choice.choice4]))" 
                                 ng-change="updateFilteredChoices(s)"
                                 class="form-control col-12" ng-disabled="s.choice.advisorChecked || s.choice.principalChecked" title="Select the first choice">
                           <option value="">Please Select</option>
@@ -99,18 +103,27 @@
                       <div class="col-12">
                         <label class="col"for="choice2DropDown">Choice 2: </label>
                         <select name="choice2DropDown" ng-model="s.choice.choice2" 
-                                ng-options="(c+' ('+tripCounts[c].taken+'/'+tripCounts[c].quota+')') for c in (s.possibleChoices2 | filter:updateFilteredChoices(s,[s.choice.choice1,s.choice.choice3]))" 
+                                ng-options="(c+' ('+tripCounts[c].taken+'/'+tripCounts[c].quota+')') for c in (s.possibleChoices2 | filter:updateFilteredChoices(s,[s.choice.choice1,s.choice.choice3, s.choice.choice4]))" 
                                 ng-change="updateFilteredChoices(s)"
                                 class="form-control col-12" ng-disabled="s.choice.advisorChecked || s.choice.principalChecked" title="Select the second choice">
                           <option value="">Please Select</option>
                         </select>
                       </div>      
                       <div class="col-12">
-                        <label class="col"for="choice2DropDown">Choice 3: </label>
+                        <label class="col"for="choice3DropDown">Choice 3: </label>
                         <select name="choice3DropDown" ng-model="s.choice.choice3" 
-                                ng-options="(c+' ('+tripCounts[c].taken+'/'+tripCounts[c].quota+')') for c in (s.possibleChoices3 | filter:updateFilteredChoices(s,[s.choice.choice1, s.choice.choice2]))" 
+                                ng-options="(c+' ('+tripCounts[c].taken+'/'+tripCounts[c].quota+')') for c in (s.possibleChoices3 | filter:updateFilteredChoices(s,[s.choice.choice1, s.choice.choice2, s.choice.choice4]))" 
                                 ng-change="updateFilteredChoices(s)"
-                                class="form-control col-12" ng-disabled="s.choice.advisorChecked || s.choice.principalChecked" title="Select the second choice">
+                                class="form-control col-12" ng-disabled="s.choice.advisorChecked || s.choice.principalChecked" title="Select the third choice">
+                          <option value="">Please Select</option>
+                        </select>
+                      </div>
+                      <div class="col-12">
+                        <label class="col" for="choice4DropDown">Choice 4: </label>
+                        <select name="choice4DropDown" ng-model="s.choice.choice4" 
+                                ng-options="(c+' ('+tripCounts[c].taken+'/'+tripCounts[c].quota+')') for c in (s.possibleChoices4 | filter:updateFilteredChoices(s,[s.choice.choice1, s.choice.choice2, s.choice.choice3]))" 
+                                ng-change="updateFilteredChoices(s)"
+                                class="form-control col-12" ng-disabled="s.choice.advisorChecked || s.choice.principalChecked" title="Select the fourth choice">
                           <option value="">Please Select</option>
                         </select>
                       </div>           

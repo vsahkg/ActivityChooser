@@ -43,7 +43,7 @@ var showSecondChoice = true; //turns on or off for displaying a second choice.
 //For HTMLService app (from template)
 //var userSheetName = 'Members';
 var challengeSheetName = 'Activity Selections';
-var appTitle = 'Choose Earth Day Activity';
+var appTitle = 'Choose Activity';
 var entityTitle = 'Selections'; // used in titles throughout app
 
   var approverEmailCol = 0;
@@ -227,6 +227,7 @@ function studentPostData(data, sindex) {
                   data.choice1,
                   data.choice2,
                   data.choice3,
+                  data.choice4,
                   data.approvalChange,
                   data.approvalDate,
                   data.principalChecked,
@@ -276,6 +277,7 @@ function parentPostData(data, sindex) {
                  data.choice1,
                  data.choice2,
                  data.choice3,
+                 data.choice4,
                  data.approvalChange,
                  data.approvalDate,
                  data.principalChecked,
@@ -313,6 +315,7 @@ function approverPostData(data, sindex){
                   data.choice1,
                   data.choice2,
                   data.choice3,
+                  data.choice4,
                   thisUser,
                   new Date(),
                   data.principalChecked,
@@ -347,7 +350,7 @@ function postData(myC, SurveyDoc, checkQuota, sindex, canPost) {
     
   //If record already exists, clear it first (this is to ensure that we get accurate course spot counts without including this user's previous choice)
   if (thisRow < lastRow){   
-    var clearRange = sheet.getRange(thisRow+1, 1, 1, 8).setValues([[myC[0][0], myC[0][1], myC[0][2], myC[0][3], myC[0][4], '', '', '']] );    
+    var clearRange = sheet.getRange(thisRow+1, 1, 1, 9).setValues([[myC[0][0], myC[0][1], myC[0][2], myC[0][3], myC[0][4], '', '', '', '']] );    
     //sheet.deleteRow(thisRow+1);
   }
   
@@ -355,7 +358,7 @@ function postData(myC, SurveyDoc, checkQuota, sindex, canPost) {
     //Check not over quota. Get quota info...
     var myCounts = countSheet.getDataRange().getValues();
     // For each course entered, if spots taken greater or equal spots available, blank that course and add error message.
-    for (var x=5; x <= 7; x++){
+    for (var x=5; x <= 8; x++){
       var RowX = ArrayLib.indexOf(myCounts, 0, myC[0][x]);
       if (RowX > -1){ 
         if (myCounts[RowX][2] >= myCounts[RowX][1]) {
@@ -386,12 +389,13 @@ function postData(myC, SurveyDoc, checkQuota, sindex, canPost) {
                        choice1: myChoices[0][5],
                        choice2: myChoices[0][6],
                        choice3: myChoices[0][7],
-                       approvalChange: myChoices[0][8],
-                       approvalDate: myChoices[0][9],
-                       principalChecked: myChoices[0][10],
-                       paid: myChoices[0][11],
+                       choice4: myChoices[0][8],
+                       approvalChange: myChoices[0][9],
+                       approvalDate: myChoices[0][10],
+                       principalChecked: myChoices[0][11],
+                       paid: myChoices[0][12],
                        canPost: canPost,
-                       house: myChoices[0][12]
+                       house: myChoices[0][13]
                         }
   } else {
     problemEnc = true;

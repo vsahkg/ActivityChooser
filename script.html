@@ -43,6 +43,8 @@ app.controller('myCtrl', function($scope, $interval, filterFilter){
                                           advisorChecked: "",
                                           choice1: "",
                                           choice2: "",
+                                          choice3: "",
+                                          choice4: "",
                                           approvalChange: "",
                                           approvalDate: "",
                                           principalChecked: "",
@@ -156,12 +158,13 @@ app.controller('myCtrl', function($scope, $interval, filterFilter){
                           choice1: myChoices[0][5],
                           choice2: myChoices[0][6],
                           choice3: myChoices[0][7],
-                          approvalChange: myChoices[0][8],
-                          approvalDate: myChoices[0][9],
-                          principalChecked: myChoices[0][10],
-                          paid: myChoices[0][11],
+                          choice4: myChoices[0][8],
+                          approvalChange: myChoices[0][9],
+                          approvalDate: myChoices[0][10],
+                          principalChecked: myChoices[0][11],
+                          paid: myChoices[0][12],
                           canPost: thisRow[16],
-                          house: myChoices[0][12]
+                          house: myChoices[0][13]
                         };
         } else {
           thisChoices = { id: thisRow[0],
@@ -172,12 +175,13 @@ app.controller('myCtrl', function($scope, $interval, filterFilter){
                           choice1: "",
                           choice2: "",
                           choice3: "",
+                          choice4: "",
                           approvalChange: "",
                           approvalDate: "",
                           principalChecked: false,
                           paid: "",
                           canPost: thisRow[16],
-                          house: thisRow[14]
+                          house: thisRow[13]
                         };
         }
         
@@ -185,8 +189,8 @@ app.controller('myCtrl', function($scope, $interval, filterFilter){
         var possibleChoices = myData.possibleChoiceList;
         for (var ch = 0; ch < possibleChoices.length; ch++){
           //Check choices for isParent and isStudent - if isStudent, make sure col 11 is True, is isParent, make sure col 12 is True. If isApprover, allow all choices.
-          if(myData.userType.isStudent && !possibleChoices[ch][12]) continue; //skip this option if student and col 11 is not true
-          if(myData.userType.isParent && !possibleChoices[ch][13]) continue; //skip this option if parent and col 12 is not true
+          if(myData.userType.isStudent && !possibleChoices[ch][13]) continue; //skip this option if student and col 11 is not true
+          if(myData.userType.isParent && !possibleChoices[ch][14]) continue; //skip this option if parent and col 12 is not true
           if(possibleChoices[ch][9]){ //if this choice is "TRUE" for choice 1
             var thisRequirement = possibleChoices[ch][6];
             var thisReqCol = possibleChoices[ch][5];
@@ -198,8 +202,8 @@ app.controller('myCtrl', function($scope, $interval, filterFilter){
         var choiceList2 = []
         for (var ch = 0; ch < possibleChoices.length; ch++){
           //Check choices for isParent and isStudent - if isStudent, make sure col 11 is True, is isParent, make sure col 12 is True. If isApprover, allow all choices.
-          if(myData.userType.isStudent && !possibleChoices[ch][12]) continue; //skip this option if student and col 11 is not true
-          if(myData.userType.isParent && !possibleChoices[ch][13]) continue; //skip this option if parent and col 12 is not true
+          if(myData.userType.isStudent && !possibleChoices[ch][13]) continue; //skip this option if student and col 11 is not true
+          if(myData.userType.isParent && !possibleChoices[ch][14]) continue; //skip this option if parent and col 12 is not true
           if(possibleChoices[ch][10]){ //if this choice is "TRUE" for choice 2
             var thisRequirement = possibleChoices[ch][6];
             var thisReqCol = possibleChoices[ch][5];
@@ -211,8 +215,8 @@ app.controller('myCtrl', function($scope, $interval, filterFilter){
         var choiceList3 = [];
         for (var ch = 0; ch < possibleChoices.length; ch++){
           //Check choices for isParent and isStudent - if isStudent, make sure col 11 is True, is isParent, make sure col 12 is True. If isApprover, allow all choices.
-          if(myData.userType.isStudent && !possibleChoices[ch][12]) continue; //skip this option if student and col 11 is not true
-          if(myData.userType.isParent && !possibleChoices[ch][13]) continue; //skip this option if parent and col 12 is not true
+          if(myData.userType.isStudent && !possibleChoices[ch][13]) continue; //skip this option if student and col 11 is not true
+          if(myData.userType.isParent && !possibleChoices[ch][14]) continue; //skip this option if parent and col 12 is not true
           if(possibleChoices[ch][11]){ //if this choice is "TRUE" for choice 3
             var thisRequirement = possibleChoices[ch][6];
             var thisReqCol = possibleChoices[ch][5];
@@ -221,7 +225,20 @@ app.controller('myCtrl', function($scope, $interval, filterFilter){
             }
           }
         }
-        students.push({student: thisStudent, currentchoice: JSON.parse(JSON.stringify(thisChoices)), choice: JSON.parse(JSON.stringify(thisChoices)), possibleChoices: choiceList, possibleChoices2: choiceList2, possibleChoices3: choiceList3}); //currentchoice will load a copy of the choice data. choice will be used to be manipulated by user and submit to server.
+        var choiceList4 = [];
+        for (var ch = 0; ch < possibleChoices.length; ch++){
+          //Check choices for isParent and isStudent - if isStudent, make sure col 11 is True, is isParent, make sure col 12 is True. If isApprover, allow all choices.
+          if(myData.userType.isStudent && !possibleChoices[ch][13]) continue; //skip this option if student and col 11 is not true
+          if(myData.userType.isParent && !possibleChoices[ch][14]) continue; //skip this option if parent and col 12 is not true
+          if(possibleChoices[ch][12]){ //if this choice is "TRUE" for choice 3
+            var thisRequirement = possibleChoices[ch][6];
+            var thisReqCol = possibleChoices[ch][5];
+            if (thisRequirement.includes(thisRow[thisReqCol])) {  //If student data matches requirement of activity
+              choiceList4.push(possibleChoices[ch][0]);
+            }
+          }
+        }
+        students.push({student: thisStudent, currentchoice: JSON.parse(JSON.stringify(thisChoices)), choice: JSON.parse(JSON.stringify(thisChoices)), possibleChoices: choiceList, possibleChoices2: choiceList2, possibleChoices3: choiceList3, possibleChoices4: choiceList4}); //currentchoice will load a copy of the choice data. choice will be used to be manipulated by user and submit to server.
       }
       $scope.students = students; 
       updateTripCounts();
@@ -377,12 +394,12 @@ app.controller('myCtrl', function($scope, $interval, filterFilter){
 
     $scope.checkButtonDisabled = function(s){ //returns TRUE if button should be disabled
       //console.log({currentchoice: s.currentchoice, choice: s.choice, equal: angular.equals(s.currentchoice,s.choice)})
-      return $scope.dataFetching || angular.equals(s.currentchoice,s.choice) || !(s.choice.choice1 && s.choice.choice2 && s.choice.choice3);
+      return $scope.dataFetching || angular.equals(s.currentchoice,s.choice) || !(s.choice.choice1 && s.choice.choice2 && s.choice.choice3 && s.choice.choice4);
     }
 
     $scope.checkParentSubmitDisabled = function(s){ //returns TRUE if button should be disabled
       //console.log({currentchoice: s.currentchoice, choice: s.choice, equal: angular.equals(s.currentchoice,s.choice)})
-      return $scope.dataFetching || angular.equals(s.currentchoice,s.choice) || !(s.choice.choice1 && s.choice.choice2 && s.choice.choice3);
+      return $scope.dataFetching || angular.equals(s.currentchoice,s.choice) || !(s.choice.choice1 && s.choice.choice2 && s.choice.choice3 && s.choice.choice4);
     }
     
     
